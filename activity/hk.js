@@ -25,5 +25,25 @@ browserPromise.then(function(browser){
     return combinedPromise;
 }).then(function(){
     let enterClcik = tab.click("h3[title='Interview Preparation Kit']");
-    return enterClcik;
+    let CombinedenterClcik = Promise.all([enterClcik,tab.waitForNavigation({waitUntil:"networkidle0"})]);
+    return CombinedenterClcik;
+}).then(function(){
+    let challenge = tab.waitForSelector("a[data-attr1='warmup']",{visible:true});
+    return challenge;
+})
+.then(function(){
+    let enterChallenge = tab.click("a[data-attr1='warmup']");
+    let combineChallenge = Promise.all([enterChallenge,tab.waitForNavigation({waitUntil:"networkidle0"})]);
+    return combineChallenge;
+}).then(function(){
+    let enterChallenge = tab.click("a[data-attr1='warmup']");
+    let combineChallenge = Promise.all([enterChallenge,tab.waitForNavigation({waitUntil:"networkidle0"})]);
+    return combineChallenge;
+}).then(function(){
+    let challenge1 = tab.waitForSelector("a[data-attr1='sock-merchant']",{visible:true});
+    return challenge1;
+}).then(function(){
+    let enterChallenge = tab.click("a[data-attr1='sock-merchant']");
+    let combineChallenge = Promise.all([enterChallenge,tab.waitForNavigation({waitUntil:"networkidle0"})]);
+    return combineChallenge;
 })
