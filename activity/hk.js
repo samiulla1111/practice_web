@@ -1,6 +1,7 @@
 let url="https://www.hackerrank.com/auth/login?h_l=body_middle_left_button&h_r=login";
 const puppeteer = require("puppeteer");
 let {password,email} = require("../secret.js");
+let {codes}=require("./code");
 let browserPromise = puppeteer.launch({
     headless:false
 })
@@ -24,26 +25,124 @@ browserPromise.then(function(browser){
     let combinedPromise = Promise.all([loginButtonClickPromise,tab.waitForNavigation({waitUntil:"networkidle0"})]);
     return combinedPromise;
 }).then(function(){
-    let enterClcik = tab.click("h3[title='Interview Preparation Kit']");
+    let enterClcik = waitAndClick("h3[title='Interview Preparation Kit']");
     let CombinedenterClcik = Promise.all([enterClcik,tab.waitForNavigation({waitUntil:"networkidle0"})]);
     return CombinedenterClcik;
 }).then(function(){
-    let challenge = tab.waitForSelector("a[data-attr1='warmup']",{visible:true});
-    return challenge;
+    let enterChallenge = waitAndClick("a[data-attr1='warmup']");
+    let combineChallenge = Promise.all([enterChallenge,tab.waitForNavigation({waitUntil:"networkidle0"})]);
+    return combineChallenge;
+}).then(function(){
+    let enterChallenge = waitAndClick("a[data-attr1='warmup']");
+    let combineChallenge = Promise.all([enterChallenge,tab.waitForNavigation({waitUntil:"networkidle0"})]);
+    return combineChallenge;
+}).then(function(){
+    // let enterChallenge = waitAndClick("a[data-attr1='sock-merchant']");
+    // let combineChallenge = Promise.all([enterChallenge,tab.waitForNavigation({waitUntil:"networkidle0"})]);
+    // return combineChallenge;
+    return tab.url();
+}).then(function(url){
+   // console.log(url);
+    let questionObj = codes[0];
+   // console.log(questionObj);
+    console.log(questionObj.qName);
+    questionSolver(url,questionObj.soln,questionObj.qName);
+}).catch(function(err){
+    console.log(err);
 })
-.then(function(){
-    let enterChallenge = tab.click("a[data-attr1='warmup']");
-    let combineChallenge = Promise.all([enterChallenge,tab.waitForNavigation({waitUntil:"networkidle0"})]);
-    return combineChallenge;
-}).then(function(){
-    let enterChallenge = tab.click("a[data-attr1='warmup']");
-    let combineChallenge = Promise.all([enterChallenge,tab.waitForNavigation({waitUntil:"networkidle0"})]);
-    return combineChallenge;
-}).then(function(){
-    let challenge1 = tab.waitForSelector("a[data-attr1='sock-merchant']",{visible:true});
-    return challenge1;
-}).then(function(){
-    let enterChallenge = tab.click("a[data-attr1='sock-merchant']");
-    let combineChallenge = Promise.all([enterChallenge,tab.waitForNavigation({waitUntil:"networkidle0"})]);
-    return combineChallenge;
-})
+
+
+function questionSolver(modulepageUrl, code, questionName) {
+    return new Promise(function (resolve, reject) {
+        // page visit 
+        let reachedPageUrlPromise = tab.goto(modulepageUrl);
+        reachedPageUrlPromise
+            .then(function () {
+                //  page h4 -> mathcing h4 -> click
+                // function will exceute inside the browser
+                function browserconsolerunFn(questionName) {
+                    let allH4Elem = document.querySelectorAll("h4");
+                    let textArr = [];
+                    for (let i = 0; i < allH4Elem.length; i++) {
+                        let myQuestion = allH4Elem[i]
+                            .innerText.split("\n")[0];
+                        textArr.push(myQuestion);
+                    }
+                    let idx = textArr.indexOf(questionName);
+                    console.log(idx);
+                    console.log("hello");
+                    allH4Elem[idx].click();
+                }
+                let pageClickPromise = tab.evaluate(browserconsolerunFn, questionName);
+                return pageClickPromise;
+            })
+            .then(function () {
+                // checkbox click
+                let inputWillBeClickedPromise = waitAndClick(".checkbox-input");
+                return inputWillBeClickedPromise;
+             })
+            // .then(function () {
+            //     // type `
+            //     let codeWillBeTypedPromise = tab.type(".custominput", code);
+            //     return codeWillBeTypedPromise;
+            // })
+            //.then(function () {
+            //     let controlIsHoldPromise = tab.keyboard.down("Control");
+            //     return controlIsHoldPromise; 
+            // }).then(function () {
+            //     // ctrl a
+            //     let aisPressedpromise = tab.keyboard.press("a");
+            //     return aisPressedpromise;
+            //     // ctrl x
+            // }).then(function () {
+            //     let cutPromise = tab.keyboard.press("x");
+            //     return cutPromise;
+            // })
+            // .then(function () {
+            //     let editorWillBeClickedPromise = tab.click(".monaco-editor.no-user-select.vs");
+            //     return editorWillBeClickedPromise;
+            // })
+            // .then(function () {
+            //     // ctrl a
+            //     let aisPressedpromise = tab.keyboard.press("a");
+            //     return aisPressedpromise;
+            //     // ctrl x
+            // })
+            // .then(function () {
+            //     let pastePromise = tab.keyboard.press("v");
+            //     return pastePromise;
+            // })
+            // .then(function () {
+            //     let submitIsClickedPromise = tab.click(".pull-right.btn.btn-primary.hr-monaco-submit");
+            //     return submitIsClickedPromise;
+            // })
+            // .then(function () {
+            //     resolve();
+            //})
+            .catch(function (err) {
+                reject(err);
+            })
+        // questionName-> appear -> click
+        // read 
+        // copy
+        // paste
+        // submit 
+    })
+}
+
+
+
+//promise based functon->wait and click
+function waitAndClick(selector){
+    return new Promise(function(resolve,reject){
+        let selectorPromise = tab.waitForSelector(selector,{visible:true});
+        selectorPromise.then(function(){
+            let selectorClickPromise = tab.click(selector);
+            return selectorClickPromise;
+        }).then(function(){
+            resolve();
+        }).catch(function(err){
+            reject();
+        })
+    })
+}
